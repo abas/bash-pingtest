@@ -35,7 +35,7 @@ is_valid_ip () {
 
 lets_rock_up () {
   for (( i=$2 ; i<=$3 ; i++ )); do
-    packet_loss=$(ping $1.$i -t 1 | grep "packet loss" | awk '{print $7}')
+    packet_loss=$(ping $1.$i -w 1 | grep "packet loss" | awk '{print $6}')
     if [[ $packet_loss = "100.0%" ]]; then
       if [[ $i -gt 99 ]]; then
         echo "| $IP_PREFIX.$i -------- | DOWN - packet_loss : $packet_loss"
@@ -58,7 +58,7 @@ lets_rock_up () {
 
 lets_rock_down () {
   for (( i=$2 ; i>=$3 ; i-- )); do
-    packet_loss=$(ping $1.$i -t 1 | grep "packet loss" | awk '{print $7}')
+    packet_loss=$(ping $1.$i -w 1 | grep "packet loss" | awk '{print $6}')
     if [[ $packet_loss = "100.0%" ]]; then
       if [[ $i -gt 99 ]]; then
         echo "| $IP_PREFIX.$i -------- | DOWN - packet_loss : $packet_loss"
