@@ -1,0 +1,80 @@
+#!/bin/bash
+set -e
+
+print_title () {
+  echo "-|---------------------------------------------------"
+  echo "| IP Address ---------- | Stat -------------------- |"
+  echo "-|---------------------------------------------------"
+}
+
+is_valid_ip () {
+  idx=0
+  prefix=$(echo $1 | tr "." "\n")
+  declare -a prefixIdx=(nil nil nil)
+  
+  for item in $prefix
+  do
+    prefixIdx[idx]=$item
+    idx=$idx+1
+  done
+  
+  if 
+    [[ ${prefixIdx[0]} -gt 255 ]] ||
+    [[ ${prefixIdx[1]} -gt 255 ]] ||
+    [[ ${prefixIdx[2]} -gt 255 ]] ||
+    [[ ${prefixIdx[0]} -lt 1 ]] ||
+    [[ ${prefixIdx[1]} -lt 0 ]] ||
+    [[ ${prefixIdx[2]} -lt 0 ]] ||
+    [[ ${prefixIdx[2]} = "nil" ]]
+  then
+    echo 1; return 1; break
+  else
+    echo 0; return 0
+  fi
+}
+
+lets_rock_up () {
+  for (( i=$2 ; i<=$3 ; i++ )); do
+    packet_loss=$(ping $1.$i -t 1 | grep "packet loss" | awk '{print $7}')
+    if [[ $packet_loss = "100.0%" ]]; then
+      if [[ $i -gt 99 ]]; then
+        echo "| $IP_PREFIX.$i -------- | DOWN - packet_loss : $packet_loss"
+      elif [[ $i -gt 9 ]]; then
+        echo "| $IP_PREFIX.$i --------- | DOWN - packet_loss : $packet_loss"
+      else
+        echo "| $IP_PREFIX.$i ---------- | DOWN - packet_loss : $packet_loss"
+      fi
+    else
+      if [[ $i -gt 99 ]]; then
+        echo "| $IP_PREFIX.$i -------- | UP --- packet_loss : $packet_loss"
+      elif [[ $i -gt 9 ]]; then
+        echo "| $IP_PREFIX.$i --------- | UP --- packet_loss : $packet_loss"
+      else
+        echo "| $IP_PREFIX.$i ---------- | UP --- packet_loss : $packet_loss"
+      fi
+    fi
+  done
+}
+
+lets_rock_down () {
+  for (( i=$2 ; i>=$3 ; i-- )); do
+    packet_loss=$(ping $1.$i -t 1 | grep "packet loss" | awk '{print $7}')
+    if [[ $packet_loss = "100.0%" ]]; then
+      if [[ $i -gt 99 ]]; then
+        echo "| $IP_PREFIX.$i -------- | DOWN - packet_loss : $packet_loss"
+      elif [[ $i -gt 9 ]]; then
+        echo "| $IP_PREFIX.$i --------- | DOWN - packet_loss : $packet_loss"
+      else
+        echo "| $IP_PREFIX.$i ---------- | DOWN - packet_loss : $packet_loss"
+      fi
+    else
+      if [[ $i -gt 99 ]]; then
+        echo "| $IP_PREFIX.$i -------- | UP --- packet_loss : $packet_loss"
+      elif [[ $i -gt 9 ]]; then
+        echo "| $IP_PREFIX.$i --------- | UP --- packet_loss : $packet_loss"
+      else
+        echo "| $IP_PREFIX.$i ---------- | UP --- packet_loss : $packet_loss"
+      fi
+    fi
+  done
+}
