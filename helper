@@ -2,9 +2,24 @@
 set -e
 
 print_title () {
-  echo "-|---------------------------------------------------"
-  echo "| IP Address ---------- | Stat -------------------- |"
-  echo "-|---------------------------------------------------"
+  echo "-|-------------------------------------------------------"
+  echo "| IP Address ------------ | Stat ---------------------- |"
+  echo "-|-------------------------------------------------------"
+}
+
+docs () {
+  echo ""
+  echo "command [option] params"
+  echo "|"
+  echo "|--> option :"
+  echo -e "|"
+  echo -e "| -h \t\t --help \t\t\t\t show help list"
+  echo -e "| -d \t\t --domain [param] \t\t\t scan ip domain"
+  echo -e "| -l \t\t --list-domain [param] \t\t\t scan ip on listed domain"
+  echo -e "| -r \t\t --range [prefix] [begin] [end] \t scan ip in range"
+  echo "|"
+  echo "-]PINGTESTER"
+  echo ""
 }
 
 is_valid_ip () {
@@ -35,22 +50,22 @@ is_valid_ip () {
 
 lets_rock_up () {
   for (( i=$2 ; i<=$3 ; i++ )); do
-    packet_loss=$(ping $1.$i -w 1 | grep "packet loss" | awk '{print $6}')
+    packet_loss=$(ping $1.$i -t 1 | grep "packet loss" | awk '{print $7}')
     if [[ $packet_loss = "100.0%" ]]; then
       if [[ $i -gt 99 ]]; then
-        echo "| $IP_PREFIX.$i -------- | DOWN - packet_loss : $packet_loss"
+        echo "| $IP_PREFIX.$i -------- | DOWN - packet_loss : $packet_loss |"
       elif [[ $i -gt 9 ]]; then
-        echo "| $IP_PREFIX.$i --------- | DOWN - packet_loss : $packet_loss"
+        echo "| $IP_PREFIX.$i --------- | DOWN - packet_loss : $packet_loss |"
       else
-        echo "| $IP_PREFIX.$i ---------- | DOWN - packet_loss : $packet_loss"
+        echo "| $IP_PREFIX.$i ---------- | DOWN - packet_loss : $packet_loss |"
       fi
     else
       if [[ $i -gt 99 ]]; then
-        echo "| $IP_PREFIX.$i -------- | UP --- packet_loss : $packet_loss"
+        echo "| $IP_PREFIX.$i -------- | UP --- packet_loss : $packet_loss  |"
       elif [[ $i -gt 9 ]]; then
-        echo "| $IP_PREFIX.$i --------- | UP --- packet_loss : $packet_loss"
+        echo "| $IP_PREFIX.$i --------- | UP --- packet_loss : $packet_loss  |"
       else
-        echo "| $IP_PREFIX.$i ---------- | UP --- packet_loss : $packet_loss"
+        echo "| $IP_PREFIX.$i ---------- | UP --- packet_loss : $packet_loss  |"
       fi
     fi
   done
@@ -61,20 +76,44 @@ lets_rock_down () {
     packet_loss=$(ping $1.$i -w 1 | grep "packet loss" | awk '{print $6}')
     if [[ $packet_loss = "100.0%" ]]; then
       if [[ $i -gt 99 ]]; then
-        echo "| $IP_PREFIX.$i -------- | DOWN - packet_loss : $packet_loss"
+        echo "| $IP_PREFIX.$i -------- | DOWN - packet_loss : $packet_loss |"
       elif [[ $i -gt 9 ]]; then
-        echo "| $IP_PREFIX.$i --------- | DOWN - packet_loss : $packet_loss"
+        echo "| $IP_PREFIX.$i --------- | DOWN - packet_loss : $packet_loss |"
       else
-        echo "| $IP_PREFIX.$i ---------- | DOWN - packet_loss : $packet_loss"
+        echo "| $IP_PREFIX.$i ---------- | DOWN - packet_loss : $packet_loss |"
       fi
     else
       if [[ $i -gt 99 ]]; then
-        echo "| $IP_PREFIX.$i -------- | UP --- packet_loss : $packet_loss"
+        echo "| $IP_PREFIX.$i -------- | UP --- packet_loss : $packet_loss |"
       elif [[ $i -gt 9 ]]; then
-        echo "| $IP_PREFIX.$i --------- | UP --- packet_loss : $packet_loss"
+        echo "| $IP_PREFIX.$i --------- | UP --- packet_loss : $packet_loss |"
       else
-        echo "| $IP_PREFIX.$i ---------- | UP --- packet_loss : $packet_loss"
+        echo "| $IP_PREFIX.$i ---------- | UP --- packet_loss : $packet_loss |"
       fi
     fi
   done
+}
+
+pingtest (){
+  IP_PREFIX=$1
+  START_POINT=$2
+  END_POINT=$3
+
+  if [[ -z $IP_PREFIX ]] || [[ -z $START_POINT ]] || [[ -z $END_POINT ]]; then
+    echo "./pingtest [prefix_ip] [start_point] [end_point]"
+    echo "|"
+    echo "|- example"
+    echo "| ./pingtest 192.168.10 1 128"
+    echo "|---"
+    echo ""
+  elif [[ $START_POINT -lt 1 ]] || [[ $END_POINT -lt 1 ]] || [[ $(is_valid_ip $IP_PREFIX) -gt 0 ]]; then
+    echo "|- invalid prefix, input valid prefix"
+    echo "|ex:"
+    echo "|-- 10.10.10"
+  else
+    print_title
+    [[ $START_POINT -gt $END_POINT ]] && \
+      lets_rock_down $IP_PREFIX $START_POINT $END_POINT || \
+      lets_rock_up $IP_PREFIX $START_POINT $END_POINT
+  fi
 }
